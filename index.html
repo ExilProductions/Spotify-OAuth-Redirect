@@ -109,7 +109,7 @@
       const params = getParams();
       const redirect = params.get("redirect");
 
-      // Case 1: Spotify callback → forward
+      // Case 1: Spotify callback then forward
       if (redirect && (params.get("code") || params.get("error"))) {
         const target = redirect + window.location.search;
         document.body.innerHTML = `
@@ -123,7 +123,7 @@
         return;
       }
 
-      // Case 2: Normal visit → show input UI
+      // Case 2: Normal visit then show input UI
       if (!redirect) {
         document.body.innerHTML = `
           <div class="container">
