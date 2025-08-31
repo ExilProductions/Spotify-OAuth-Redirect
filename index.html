@@ -4,8 +4,98 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Spotify OAuth Redirect</title>
+  <style>
+    :root {
+      --spotify-green: #1db954;
+      --spotify-black: #191414;
+      --spotify-dark: #121212;
+      --spotify-light: #b3b3b3;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--spotify-dark);
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      text-align: center;
+    }
+
+    h1 {
+      color: var(--spotify-green);
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    p {
+      color: var(--spotify-light);
+      margin: 0.5rem 0;
+    }
+
+    input {
+      padding: 12px;
+      font-size: 1rem;
+      border: 1px solid #333;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 400px;
+      margin-top: 1rem;
+      background-color: var(--spotify-black);
+      color: white;
+    }
+
+    button {
+      margin-top: 1rem;
+      padding: 12px 24px;
+      font-size: 1rem;
+      background-color: var(--spotify-green);
+      border: none;
+      border-radius: 30px;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #1ed760;
+    }
+
+    code {
+      background: var(--spotify-black);
+      color: var(--spotify-green);
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-top: 10px;
+      word-break: break-all;
+    }
+
+    .container {
+      max-width: 600px;
+      padding: 2rem;
+    }
+
+    .spinner {
+      margin-top: 2rem;
+      border: 4px solid #333;
+      border-top: 4px solid var(--spotify-green);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
   <script>
-    // helper: parse query params
     function getParams() {
       return new URLSearchParams(window.location.search);
     }
@@ -19,23 +109,31 @@
       const params = getParams();
       const redirect = params.get("redirect");
 
-      // Case 1: Spotify callback (redirect param set + code/state returned)
+      // Case 1: Spotify callback → forward
       if (redirect && (params.get("code") || params.get("error"))) {
-        // forward everything to backend
         const target = redirect + window.location.search;
+        document.body.innerHTML = `
+          <div class="container">
+            <h1>Spotify Redirect</h1>
+            <p>Redirecting you back to your app…</p>
+            <div class="spinner"></div>
+          </div>
+        `;
         window.location.replace(target);
         return;
       }
 
-      // Case 2: Normal visit -> show UI
+      // Case 2: Normal visit → show input UI
       if (!redirect) {
         document.body.innerHTML = `
-          <h1>Spotify Redirect Helper</h1>
-          <p>Enter your backend callback URL:</p>
-          <input id="backend" type="text" placeholder="http://localhost:3000/callback" style="width:90%;max-width:400px" />
-          <br/><br/>
-          <button onclick="generate()">Generate Redirect URI</button>
-          <p id="output" style="margin-top:20px"></p>
+          <div class="container">
+            <h1>Spotify Redirect Helper</h1>
+            <p>Enter your backend callback URL:</p>
+            <input id="backend" type="text" placeholder="http://localhost:3000/callback" />
+            <br/>
+            <button onclick="generate()">Generate Redirect URI</button>
+            <p id="output"></p>
+          </div>
         `;
         window.generate = () => {
           const val = document.getElementById("backend").value.trim();
@@ -44,44 +142,28 @@
             return;
           }
           const link = buildLink(val);
-          document.getElementById("output").innerHTML = 
+          document.getElementById("output").innerHTML =
             "Use this in Spotify dashboard:<br/><code>" + link + "</code>";
         };
         return;
       }
 
-      // Case 3: redirect param is set but no Spotify params (user mis-paste)
+      // Case 3: Configured redirect but no Spotify params
       document.body.innerHTML = `
-        <h1>Configured Redirect</h1>
-        <p>This page is ready to forward Spotify auth results to:</p>
-        <code>${redirect}</code>
-        <p>Try running the Spotify auth flow now.</p>
+        <div class="container">
+          <h1>Spotify Redirect Ready</h1>
+          <p>This page will forward Spotify login results to:</p>
+          <code>${redirect}</code>
+          <p>Start your Spotify login flow to test.</p>
+        </div>
       `;
     };
   </script>
-  <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-    }
-    code {
-      background: #f0f0f0;
-      padding: 3px 6px;
-      border-radius: 4px;
-    }
-    input {
-      padding: 8px;
-      font-size: 1rem;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 1rem;
-      cursor: pointer;
-    }
-  </style>
 </head>
 <body>
-  <p>Loading…</p>
+  <div class="container">
+    <h1>Loading Spotify Redirect…</h1>
+    <div class="spinner"></div>
+  </div>
 </body>
 </html>
